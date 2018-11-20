@@ -1,0 +1,351 @@
+Parameters:
+  Owner:
+    Type: String
+    Description: "The owner of the github repo: https://github.com/OWNER/repo"
+  Repo:
+    Type: String
+    Description: "The repo : https://github.com/owner/REPO"
+  Branch:
+    Type: String
+    Description: The branch of the github repo
+  Token:
+    Type: String
+    Description: The OAuth token to use to gain access to the repo
+  C7NVERSION:
+    Type: String
+    Description: Version of c7n to use
+Resources:
+  CloudCustodianArtifactsBucket23B88D24:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Retain
+    Metadata:
+      aws:cdk:path: CdkStack/CloudCustodian-/ArtifactsBucket/Resource
+  CloudCustodianRoleF8114338:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Action: sts:AssumeRole
+            Effect: Allow
+            Principal:
+              Service: codepipeline.amazonaws.com
+        Version: "2012-10-17"
+    Metadata:
+      aws:cdk:path: CdkStack/CloudCustodian-/Role/Resource
+  CloudCustodianRoleDefaultPolicy6A7DDA48:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyDocument:
+        Statement:
+          - Action:
+              - s3:GetObject*
+              - s3:GetBucket*
+              - s3:List*
+              - s3:DeleteObject*
+              - s3:PutObject*
+              - s3:Abort*
+            Effect: Allow
+            Resource:
+              - Fn::GetAtt:
+                  - CloudCustodianArtifactsBucket23B88D24
+                  - Arn
+              - Fn::Join:
+                  - ""
+                  - - Fn::GetAtt:
+                        - CloudCustodianArtifactsBucket23B88D24
+                        - Arn
+                    - /*
+          - Action: iam:PassRole
+            Effect: Allow
+            Resource:
+              Fn::GetAtt:
+                - DeployServiceStackAChangeSetRoleA1245536
+                - Arn
+          - Action:
+              - cloudformation:CreateChangeSet
+              - cloudformation:DeleteChangeSet
+              - cloudformation:DescribeChangeSet
+              - cloudformation:DescribeStacks
+            Condition:
+              StringEqualsIfExists:
+                cloudformation:ChangeSetName: changeIsGood
+            Effect: Allow
+            Resource:
+              Fn::Join:
+                - ""
+                - - "arn:"
+                  - Ref: AWS::Partition
+                  - ":cloudformation:"
+                  - Ref: AWS::Region
+                  - ":"
+                  - Ref: AWS::AccountId
+                  - :stack/CdkStack/*
+          - Action: cloudformation:ExecuteChangeSet
+            Condition:
+              StringEquals:
+                cloudformation:ChangeSetName: changeIsGood
+            Effect: Allow
+            Resource:
+              Fn::Join:
+                - ""
+                - - "arn:"
+                  - Ref: AWS::Partition
+                  - ":cloudformation:"
+                  - Ref: AWS::Region
+                  - ":"
+                  - Ref: AWS::AccountId
+                  - :stack/CdkStack/*
+        Version: "2012-10-17"
+      PolicyName: CloudCustodianRoleDefaultPolicy6A7DDA48
+      Roles:
+        - Ref: CloudCustodianRoleF8114338
+    Metadata:
+      aws:cdk:path: CdkStack/CloudCustodian-/Role/DefaultPolicy/Resource
+  CloudCustodian49A01519:
+    Type: AWS::CodePipeline::Pipeline
+    Properties:
+      RoleArn:
+        Fn::GetAtt:
+          - CloudCustodianRoleF8114338
+          - Arn
+      Stages:
+        - Actions:
+            - ActionTypeId:
+                Category: Source
+                Owner: ThirdParty
+                Provider: GitHub
+                Version: "1"
+              Configuration:
+                Owner:
+                  Ref: Owner
+                Repo:
+                  Ref: Repo
+                Branch:
+                  Ref: Branch
+                OAuthToken:
+                  Ref: Token
+                PollForSourceChanges: false
+              InputArtifacts:
+                []
+              Name: clone
+              OutputArtifacts:
+                - Name: source
+              RunOrder: 1
+          Name: Clone
+        - Actions:
+            - ActionTypeId:
+                Category: Deploy
+                Owner: AWS
+                Provider: CloudFormation
+                Version: "1"
+              Configuration:
+                StackName: CdkStack
+                ActionMode: CHANGE_SET_REPLACE
+                ChangeSetName: changeIsGood
+                TemplatePath: source::CdkStack.template.yaml
+                RoleArn:
+                  Fn::GetAtt:
+                    - DeployServiceStackAChangeSetRoleA1245536
+                    - Arn
+              InputArtifacts:
+                - Name: source
+              Name: ChangeSet
+              OutputArtifacts:
+                []
+              RunOrder: 1
+            - ActionTypeId:
+                Category: Deploy
+                Owner: AWS
+                Provider: CloudFormation
+                Version: "1"
+              Configuration:
+                StackName: CdkStack
+                ActionMode: CHANGE_SET_EXECUTE
+                ChangeSetName: changeIsGood
+              InputArtifacts:
+                []
+              Name: Execute
+              OutputArtifacts:
+                []
+              RunOrder: 3
+            - ActionTypeId:
+                Category: Approval
+                Owner: AWS
+                Provider: Manual
+                Version: "1"
+              InputArtifacts:
+                []
+              Name: ApproveChanges
+              OutputArtifacts:
+                []
+              RunOrder: 2
+          Name: UpdateStack
+      ArtifactStore:
+        Location:
+          Ref: CloudCustodianArtifactsBucket23B88D24
+        Type: S3
+      RestartExecutionOnUpdate: true
+    DependsOn:
+      - CloudCustodianRoleF8114338
+      - CloudCustodianRoleDefaultPolicy6A7DDA48
+    Metadata:
+      aws:cdk:path: CdkStack/CloudCustodian-/Resource
+  cloneWebhookResource4649A1C1:
+    Type: AWS::CodePipeline::Webhook
+    Properties:
+      Authentication: GITHUB_HMAC
+      AuthenticationConfiguration:
+        SecretToken:
+          Ref: Token
+      Filters:
+        - JsonPath: $.ref
+          MatchEquals: refs/heads/{Branch}
+      TargetAction: clone
+      TargetPipeline:
+        Ref: CloudCustodian49A01519
+      TargetPipelineVersion: 1
+      RegisterWithThirdParty: true
+    Metadata:
+      aws:cdk:path: CdkStack/clone/WebhookResource
+  DeployServiceStackAChangeSetRoleA1245536:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Action: sts:AssumeRole
+            Effect: Allow
+            Principal:
+              Service: cloudformation.amazonaws.com
+        Version: "2012-10-17"
+    Metadata:
+      aws:cdk:path: CdkStack/DeployServiceStackA/ChangeSet/Role/Resource
+  CustodianMasterRole082F2587:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Action: sts:AssumeRole
+            Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+        Version: "2012-10-17"
+    Metadata:
+      aws:cdk:path: CdkStack/CustodianMasterRole/Resource
+  CustodianMasterPolicyACD66D26:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyDocument:
+        Statement:
+          - Action: "*"
+            Effect: Allow
+            Resource: "*"
+        Version: "2012-10-17"
+      PolicyName: CustodianMasterPolicyACD66D26
+      Roles:
+        - Ref: CustodianMasterRole082F2587
+    Metadata:
+      aws:cdk:path: CdkStack/CustodianMasterPolicy/Resource
+  CodeBuildRoleE9A44575:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Action: sts:AssumeRole
+            Effect: Allow
+            Principal:
+              Service: codebuild.amazonaws.com
+        Version: "2012-10-17"
+    Metadata:
+      aws:cdk:path: CdkStack/CodeBuild/Role/Resource
+  CodeBuildRoleDefaultPolicy196BAF24:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyDocument:
+        Statement:
+          - Action:
+              - logs:CreateLogGroup
+              - logs:CreateLogStream
+              - logs:PutLogEvents
+            Effect: Allow
+            Resource:
+              - Fn::Join:
+                  - ""
+                  - - "arn:"
+                    - Ref: AWS::Partition
+                    - ":logs:"
+                    - Ref: AWS::Region
+                    - ":"
+                    - Ref: AWS::AccountId
+                    - :log-group:/aws/codebuild/
+                    - Ref: CodeBuild2FDE9E35
+              - Fn::Join:
+                  - ""
+                  - - "arn:"
+                    - Ref: AWS::Partition
+                    - ":logs:"
+                    - Ref: AWS::Region
+                    - ":"
+                    - Ref: AWS::AccountId
+                    - :log-group:/aws/codebuild/
+                    - Ref: CodeBuild2FDE9E35
+                    - :*
+        Version: "2012-10-17"
+      PolicyName: CodeBuildRoleDefaultPolicy196BAF24
+      Roles:
+        - Ref: CodeBuildRoleE9A44575
+    Metadata:
+      aws:cdk:path: CdkStack/CodeBuild/Role/DefaultPolicy/Resource
+  CodeBuild2FDE9E35:
+    Type: AWS::CodeBuild::Project
+    Properties:
+      Artifacts:
+        Type: CODEPIPELINE
+      Environment:
+        ComputeType: BUILD_GENERAL1_SMALL
+        Image: aws/codebuild/python:2.7.12
+        PrivilegedMode: false
+        Type: LINUX_CONTAINER
+      ServiceRole:
+        Fn::GetAtt:
+          - CodeBuildRoleE9A44575
+          - Arn
+      Source:
+        BuildSpec:
+          Fn::Join:
+            - ""
+            - - |-
+                {
+                  "version": "0.2",
+                  "phases": {
+                    "install": {
+                      "commands": [
+                        "echo hello
+              - Ref: C7NVERSION
+              - |-
+                "
+                      ]
+                    },
+                    "build": {
+                      "commands": [
+                        "npm run build"
+                      ]
+                    }
+                  },
+                  "artifacts": {
+                    "base-directory": "dist",
+                    "files": "**/*"
+                  }
+                }
+        Type: CODEPIPELINE
+    Metadata:
+      aws:cdk:path: CdkStack/CodeBuild/Resource
+  CDKMetadata:
+    Type: AWS::CDK::Metadata
+    Properties:
+      Modules: "@aws-cdk/app-delivery=0.18.0,@aws-cdk/aws-cloudformation=0.18.0,@aws-c\
+        dk/aws-cloudwatch=0.18.0,@aws-cdk/aws-codebuild=0.18.0,@aws-cdk/aws-cod\
+        epipeline=0.18.0,@aws-cdk/aws-codepipeline-api=0.18.0,@aws-cdk/aws-even\
+        ts=0.18.0,@aws-cdk/aws-iam=0.18.0,@aws-cdk/aws-kms=0.18.0,@aws-cdk/aws-\
+        s3=0.18.0,@aws-cdk/aws-s3-notifications=0.18.0,@aws-cdk/cdk=0.18.0,@aws\
+        -cdk/cx-api=0.18.0,cdk=0.1.0"
+
