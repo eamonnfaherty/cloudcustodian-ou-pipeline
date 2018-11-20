@@ -552,7 +552,7 @@ Resources:
                     },
                     "build": {
                       "commands": [
-                        "curl https://github.com/capitalone/cloud-custodian/archive/
+                        "curl -L https://github.com/capitalone/cloud-custodian/archive/
               - Ref: C7NVersion
               - >-
                 .zip -o c7n.zip",
