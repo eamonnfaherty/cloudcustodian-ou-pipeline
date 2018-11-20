@@ -59,7 +59,7 @@ Resources:
             Effect: Allow
             Resource:
               Fn::GetAtt:
-                - DeployServiceStackAChangeSetRoleA1245536
+                - GeneratePipelineChangeSetRole2F2D52E3
                 - Arn
           - Action:
               - cloudformation:CreateChangeSet
@@ -68,7 +68,7 @@ Resources:
               - cloudformation:DescribeStacks
             Condition:
               StringEqualsIfExists:
-                cloudformation:ChangeSetName: changeIsGood
+                cloudformation:ChangeSetName: pipelineChangeSet
             Effect: Allow
             Resource:
               Fn::Join:
@@ -83,7 +83,7 @@ Resources:
           - Action: cloudformation:ExecuteChangeSet
             Condition:
               StringEquals:
-                cloudformation:ChangeSetName: changeIsGood
+                cloudformation:ChangeSetName: pipelineChangeSet
             Effect: Allow
             Resource:
               Fn::Join:
@@ -141,15 +141,27 @@ Resources:
               Configuration:
                 StackName: CdkStack
                 ActionMode: CHANGE_SET_REPLACE
-                ChangeSetName: changeIsGood
-                TemplatePath: source::CdkStack.template.yaml
+                ChangeSetName: pipelineChangeSet
+                TemplatePath: source::pipeline.template.yaml
+                Capabilities: CAPABILITY_NAMED_IAM
                 RoleArn:
                   Fn::GetAtt:
-                    - DeployServiceStackAChangeSetRoleA1245536
+                    - GeneratePipelineChangeSetRole2F2D52E3
                     - Arn
               InputArtifacts:
                 - Name: source
-              Name: ChangeSet
+              Name: GeneratePipelineChangeSet
+              OutputArtifacts:
+                []
+              RunOrder: 1
+            - ActionTypeId:
+                Category: Approval
+                Owner: AWS
+                Provider: Manual
+                Version: "1"
+              InputArtifacts:
+                []
+              Name: ApprovePipelineChangeSet
               OutputArtifacts:
                 []
               RunOrder: 1
@@ -161,24 +173,13 @@ Resources:
               Configuration:
                 StackName: CdkStack
                 ActionMode: CHANGE_SET_EXECUTE
-                ChangeSetName: changeIsGood
+                ChangeSetName: pipelineChangeSet
               InputArtifacts:
                 []
-              Name: Execute
+              Name: ApplyPipelineChangeSet
               OutputArtifacts:
                 []
-              RunOrder: 3
-            - ActionTypeId:
-                Category: Approval
-                Owner: AWS
-                Provider: Manual
-                Version: "1"
-              InputArtifacts:
-                []
-              Name: ApproveChanges
-              OutputArtifacts:
-                []
-              RunOrder: 2
+              RunOrder: 1
           Name: UpdateStack
       ArtifactStore:
         Location:
@@ -207,7 +208,7 @@ Resources:
       RegisterWithThirdParty: true
     Metadata:
       aws:cdk:path: CdkStack/clone/WebhookResource
-  DeployServiceStackAChangeSetRoleA1245536:
+  GeneratePipelineChangeSetRole2F2D52E3:
     Type: AWS::IAM::Role
     Properties:
       AssumeRolePolicyDocument:
@@ -218,7 +219,21 @@ Resources:
               Service: cloudformation.amazonaws.com
         Version: "2012-10-17"
     Metadata:
-      aws:cdk:path: CdkStack/DeployServiceStackA/ChangeSet/Role/Resource
+      aws:cdk:path: CdkStack/GeneratePipelineChangeSet/Role/Resource
+  GeneratePipelineChangeSetRoleDefaultPolicy1774FD25:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyDocument:
+        Statement:
+          - Action: "*"
+            Effect: Allow
+            Resource: "*"
+        Version: "2012-10-17"
+      PolicyName: GeneratePipelineChangeSetRoleDefaultPolicy1774FD25
+      Roles:
+        - Ref: GeneratePipelineChangeSetRole2F2D52E3
+    Metadata:
+      aws:cdk:path: CdkStack/GeneratePipelineChangeSet/Role/DefaultPolicy/Resource
   CustodianMasterRole082F2587:
     Type: AWS::IAM::Role
     Properties:
@@ -319,7 +334,7 @@ Resources:
                   "phases": {
                     "install": {
                       "commands": [
-                        "echo hello
+                        "pip install c7n==
               - Ref: C7NVERSION
               - |-
                 "
@@ -342,10 +357,9 @@ Resources:
   CDKMetadata:
     Type: AWS::CDK::Metadata
     Properties:
-      Modules: "@aws-cdk/app-delivery=0.18.0,@aws-cdk/aws-cloudformation=0.18.0,@aws-c\
-        dk/aws-cloudwatch=0.18.0,@aws-cdk/aws-codebuild=0.18.0,@aws-cdk/aws-cod\
-        epipeline=0.18.0,@aws-cdk/aws-codepipeline-api=0.18.0,@aws-cdk/aws-even\
-        ts=0.18.0,@aws-cdk/aws-iam=0.18.0,@aws-cdk/aws-kms=0.18.0,@aws-cdk/aws-\
-        s3=0.18.0,@aws-cdk/aws-s3-notifications=0.18.0,@aws-cdk/cdk=0.18.0,@aws\
-        -cdk/cx-api=0.18.0,cdk=0.1.0"
+      Modules: "@aws-cdk/aws-cloudformation=0.18.0,@aws-cdk/aws-cloudwatch=0.18.0,@aws\
+        -cdk/aws-codebuild=0.18.0,@aws-cdk/aws-codepipeline=0.18.0,@aws-cdk/aws\
+        -codepipeline-api=0.18.0,@aws-cdk/aws-events=0.18.0,@aws-cdk/aws-iam=0.\
+        18.0,@aws-cdk/aws-kms=0.18.0,@aws-cdk/aws-s3=0.18.0,@aws-cdk/aws-s3-not\
+        ifications=0.18.0,@aws-cdk/cdk=0.18.0,@aws-cdk/cx-api=0.18.0,cdk=0.1.0"
 
