@@ -537,6 +537,14 @@ Resources:
                 - - "arn:aws:lambda:*:"
                   - Ref: AWS::AccountId
                   - :function:custodian-*
+          - Action: iam:PassRole
+            Effect: Allow
+            Resource:
+              Fn::Join:
+                - ""
+                - - "arn:aws:iam::"
+                  - Ref: AWS::AccountId
+                  - :role/CustodianSpokeRole
         Version: "2012-10-17"
       PolicyName: c7nDeployProjectRoleDefaultPolicy050FCE60
       Roles:
