@@ -148,6 +148,20 @@ Resources:
                   Fn::GetAtt:
                     - GeneratePipelineChangeSetRole2F2D52E3
                     - Arn
+                ParameterOverrides:
+                  Fn::Join:
+                    - ""
+                    - - '{"owner":"'
+                      - Ref: Owner
+                      - '","repo":"'
+                      - Ref: Repo
+                      - '","branch":"'
+                      - Ref: Branch
+                      - '","token":"'
+                      - Ref: Token
+                      - '","c7nVersion":"'
+                      - Ref: C7NVERSION
+                      - '"}'
               InputArtifacts:
                 - Name: source
               Name: GeneratePipelineChangeSet
