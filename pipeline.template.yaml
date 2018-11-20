@@ -582,7 +582,7 @@ Resources:
                 /tools/c7n_org/scripts/orgaccounts.py -f accounts.yml --role
                 arn:aws:iam::{Id}:role/CustodianSpokeRole",
                         "cat accounts.yml",
-                        "c7n-org run -c accounts.yml -s output -u policies/* --dryrun"
+                        "find policies -name '*.yaml' | sed 's/^/c7n-org run -c accounts.yml -s output -u /g' | sh"
                       ]
                     }
                   },
