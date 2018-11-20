@@ -524,7 +524,9 @@ Resources:
                         - CloudCustodianArtifactsBucket23B88D24
                         - Arn
                     - /*
-          - Action: organizations:ListRoots
+          - Action:
+              - organizations:List*
+              - organizations:Describe*
             Effect: Allow
             Resource: "*"
         Version: "2012-10-17"
