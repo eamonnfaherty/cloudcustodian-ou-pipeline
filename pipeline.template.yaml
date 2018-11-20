@@ -18,8 +18,6 @@ Resources:
   CloudCustodianArtifactsBucket23B88D24:
     Type: AWS::S3::Bucket
     DeletionPolicy: Retain
-    Metadata:
-      aws:cdk:path: CdkStack/CloudCustodian-/ArtifactsBucket/Resource
   CloudCustodianRoleF8114338:
     Type: AWS::IAM::Role
     Properties:
@@ -30,8 +28,6 @@ Resources:
             Principal:
               Service: codepipeline.amazonaws.com
         Version: "2012-10-17"
-    Metadata:
-      aws:cdk:path: CdkStack/CloudCustodian-/Role/Resource
   CloudCustodianRoleDefaultPolicy6A7DDA48:
     Type: AWS::IAM::Policy
     Properties:
@@ -112,8 +108,6 @@ Resources:
       PolicyName: CloudCustodianRoleDefaultPolicy6A7DDA48
       Roles:
         - Ref: CloudCustodianRoleF8114338
-    Metadata:
-      aws:cdk:path: CdkStack/CloudCustodian-/Role/DefaultPolicy/Resource
   CloudCustodian49A01519:
     Type: AWS::CodePipeline::Pipeline
     Properties:
@@ -234,8 +228,6 @@ Resources:
     DependsOn:
       - CloudCustodianRoleF8114338
       - CloudCustodianRoleDefaultPolicy6A7DDA48
-    Metadata:
-      aws:cdk:path: CdkStack/CloudCustodian-/Resource
   cloneWebhookResource4649A1C1:
     Type: AWS::CodePipeline::Webhook
     Properties:
@@ -251,8 +243,6 @@ Resources:
         Ref: CloudCustodian49A01519
       TargetPipelineVersion: 1
       RegisterWithThirdParty: true
-    Metadata:
-      aws:cdk:path: CdkStack/clone/WebhookResource
   GeneratePipelineChangeSetRole2F2D52E3:
     Type: AWS::IAM::Role
     Properties:
@@ -263,8 +253,6 @@ Resources:
             Principal:
               Service: cloudformation.amazonaws.com
         Version: "2012-10-17"
-    Metadata:
-      aws:cdk:path: CdkStack/GeneratePipelineChangeSet/Role/Resource
   GeneratePipelineChangeSetRoleDefaultPolicy1774FD25:
     Type: AWS::IAM::Policy
     Properties:
@@ -277,8 +265,6 @@ Resources:
       PolicyName: GeneratePipelineChangeSetRoleDefaultPolicy1774FD25
       Roles:
         - Ref: GeneratePipelineChangeSetRole2F2D52E3
-    Metadata:
-      aws:cdk:path: CdkStack/GeneratePipelineChangeSet/Role/DefaultPolicy/Resource
   CustodianMasterRole082F2587:
     Type: AWS::IAM::Role
     Properties:
@@ -289,8 +275,6 @@ Resources:
             Principal:
               Service: lambda.amazonaws.com
         Version: "2012-10-17"
-    Metadata:
-      aws:cdk:path: CdkStack/CustodianMasterRole/Resource
   CustodianMasterPolicyACD66D26:
     Type: AWS::IAM::Policy
     Properties:
@@ -303,8 +287,6 @@ Resources:
       PolicyName: CustodianMasterPolicyACD66D26
       Roles:
         - Ref: CustodianMasterRole082F2587
-    Metadata:
-      aws:cdk:path: CdkStack/CustodianMasterPolicy/Resource
   c7nProjectRoleEC52F161:
     Type: AWS::IAM::Role
     Properties:
@@ -315,8 +297,6 @@ Resources:
             Principal:
               Service: codebuild.amazonaws.com
         Version: "2012-10-17"
-    Metadata:
-      aws:cdk:path: CdkStack/c7nProject/Role/Resource
   c7nProjectRoleDefaultPolicyC62756F6:
     Type: AWS::IAM::Policy
     Properties:
@@ -371,8 +351,6 @@ Resources:
       PolicyName: c7nProjectRoleDefaultPolicyC62756F6
       Roles:
         - Ref: c7nProjectRoleEC52F161
-    Metadata:
-      aws:cdk:path: CdkStack/c7nProject/Role/DefaultPolicy/Resource
   c7nProject9B7F3F92:
     Type: AWS::CodeBuild::Project
     Properties:
@@ -415,14 +393,4 @@ Resources:
                   }
                 }
         Type: NO_SOURCE
-    Metadata:
-      aws:cdk:path: CdkStack/c7nProject/Resource
-  CDKMetadata:
-    Type: AWS::CDK::Metadata
-    Properties:
-      Modules: "@aws-cdk/aws-cloudformation=0.18.0,@aws-cdk/aws-cloudwatch=0.18.0,@aws\
-        -cdk/aws-codebuild=0.18.0,@aws-cdk/aws-codepipeline=0.18.0,@aws-cdk/aws\
-        -codepipeline-api=0.18.0,@aws-cdk/aws-events=0.18.0,@aws-cdk/aws-iam=0.\
-        18.0,@aws-cdk/aws-kms=0.18.0,@aws-cdk/aws-s3=0.18.0,@aws-cdk/aws-s3-not\
-        ifications=0.18.0,@aws-cdk/cdk=0.18.0,@aws-cdk/cx-api=0.18.0,cdk=0.1.0"
 
