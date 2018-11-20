@@ -106,7 +106,7 @@ Resources:
             Effect: Allow
             Resource:
               Fn::GetAtt:
-                - CodeBuild2FDE9E35
+                - c7nProject9B7F3F92
                 - Arn
         Version: "2012-10-17"
       PolicyName: CloudCustodianRoleDefaultPolicy6A7DDA48
@@ -144,7 +144,7 @@ Resources:
               OutputArtifacts:
                 - Name: source
               RunOrder: 1
-          Name: Clone
+          Name: CloneStage
         - Actions:
             - ActionTypeId:
                 Category: Deploy
@@ -218,14 +218,14 @@ Resources:
                 Version: "1"
               Configuration:
                 ProjectName:
-                  Ref: CodeBuild2FDE9E35
+                  Ref: c7nProject9B7F3F92
               InputArtifacts:
                 - Name: source
-              Name: c7n
+              Name: c7nAction
               OutputArtifacts:
-                - Name: Artifact_CdkStackc7n0E6D1C66
+                - Name: Artifact_CdkStackc7nProjectc7nAction03BFD6FE
               RunOrder: 1
-          Name: c7n
+          Name: c7nStage
       ArtifactStore:
         Location:
           Ref: CloudCustodianArtifactsBucket23B88D24
@@ -305,7 +305,7 @@ Resources:
         - Ref: CustodianMasterRole082F2587
     Metadata:
       aws:cdk:path: CdkStack/CustodianMasterPolicy/Resource
-  CodeBuildRoleE9A44575:
+  c7nProjectRoleEC52F161:
     Type: AWS::IAM::Role
     Properties:
       AssumeRolePolicyDocument:
@@ -316,8 +316,8 @@ Resources:
               Service: codebuild.amazonaws.com
         Version: "2012-10-17"
     Metadata:
-      aws:cdk:path: CdkStack/CodeBuild/Role/Resource
-  CodeBuildRoleDefaultPolicy196BAF24:
+      aws:cdk:path: CdkStack/c7nProject/Role/Resource
+  c7nProjectRoleDefaultPolicyC62756F6:
     Type: AWS::IAM::Policy
     Properties:
       PolicyDocument:
@@ -337,7 +337,7 @@ Resources:
                     - ":"
                     - Ref: AWS::AccountId
                     - :log-group:/aws/codebuild/
-                    - Ref: CodeBuild2FDE9E35
+                    - Ref: c7nProject9B7F3F92
               - Fn::Join:
                   - ""
                   - - "arn:"
@@ -347,7 +347,7 @@ Resources:
                     - ":"
                     - Ref: AWS::AccountId
                     - :log-group:/aws/codebuild/
-                    - Ref: CodeBuild2FDE9E35
+                    - Ref: c7nProject9B7F3F92
                     - :*
           - Action:
               - s3:GetObject*
@@ -368,16 +368,16 @@ Resources:
                         - Arn
                     - /*
         Version: "2012-10-17"
-      PolicyName: CodeBuildRoleDefaultPolicy196BAF24
+      PolicyName: c7nProjectRoleDefaultPolicyC62756F6
       Roles:
-        - Ref: CodeBuildRoleE9A44575
+        - Ref: c7nProjectRoleEC52F161
     Metadata:
-      aws:cdk:path: CdkStack/CodeBuild/Role/DefaultPolicy/Resource
-  CodeBuild2FDE9E35:
+      aws:cdk:path: CdkStack/c7nProject/Role/DefaultPolicy/Resource
+  c7nProject9B7F3F92:
     Type: AWS::CodeBuild::Project
     Properties:
       Artifacts:
-        Type: CODEPIPELINE
+        Type: NO_ARTIFACTS
       Environment:
         ComputeType: BUILD_GENERAL1_SMALL
         Image: aws/codebuild/python:2.7.12
@@ -385,7 +385,7 @@ Resources:
         Type: LINUX_CONTAINER
       ServiceRole:
         Fn::GetAtt:
-          - CodeBuildRoleE9A44575
+          - c7nProjectRoleEC52F161
           - Arn
       Source:
         BuildSpec:
@@ -414,9 +414,9 @@ Resources:
                     "files": "**/*"
                   }
                 }
-        Type: CODEPIPELINE
+        Type: NO_SOURCE
     Metadata:
-      aws:cdk:path: CdkStack/CodeBuild/Resource
+      aws:cdk:path: CdkStack/c7nProject/Resource
   CDKMetadata:
     Type: AWS::CDK::Metadata
     Properties:
