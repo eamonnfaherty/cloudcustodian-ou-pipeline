@@ -1,0 +1,13 @@
+policies:
+- name: ec2-cloudtrail-stop-infected
+  resource: ec2
+  description: |
+    Stop all infected ec2 instances
+  mode:
+    type: cloudtrail
+    events:
+    - RunInstances
+  filters:
+  - "tag:Infected": present
+  actions:
+  - stop
