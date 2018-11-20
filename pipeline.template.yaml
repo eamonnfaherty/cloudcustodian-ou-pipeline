@@ -547,9 +547,6 @@ Resources:
                 - - "arn:aws:iam::"
                   - Ref: AWS::AccountId
                   - :role/CustodianSpokeRole
-          - Effect: Allow
-            Principal:
-              Service: lambda.amazonaws.com
         Version: "2012-10-17"
       PolicyName: c7nDeployProjectRoleDefaultPolicy050FCE60
       Roles:
