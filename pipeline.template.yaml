@@ -11,7 +11,7 @@ Parameters:
   Token:
     Type: String
     Description: The OAuth token to use to gain access to the repo
-  C7NVERSION:
+  C7NVersion:
     Type: String
     Description: Version of c7n to use
 Resources:
@@ -151,16 +151,16 @@ Resources:
                 ParameterOverrides:
                   Fn::Join:
                     - ""
-                    - - '{"owner":"'
+                    - - '{"Owner":"'
                       - Ref: Owner
-                      - '","repo":"'
+                      - '","Repo":"'
                       - Ref: Repo
-                      - '","branch":"'
+                      - '","Branch":"'
                       - Ref: Branch
-                      - '","token":"'
+                      - '","Token":"'
                       - Ref: Token
-                      - '","c7nVersion":"'
-                      - Ref: C7NVERSION
+                      - '","C7NVersion":"'
+                      - Ref: C7NVersion
                       - '"}'
               InputArtifacts:
                 - Name: source
@@ -349,7 +349,7 @@ Resources:
                     "install": {
                       "commands": [
                         "pip install c7n==
-              - Ref: C7NVERSION
+              - Ref: C7NVersion
               - |-
                 "
                       ]
