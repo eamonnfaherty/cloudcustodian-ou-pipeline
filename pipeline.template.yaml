@@ -561,6 +561,10 @@ Resources:
                         "python orgaccounts.py -f accounts.yml",
                         "c7n-org run -c accounts.yml -s output -u test.yml --dryrun"
                       ]
+                    },
+                    "artifacts": {
+                      "base-directory": "output",
+                      "files": "**/*"
                     }
                   }
                 }
