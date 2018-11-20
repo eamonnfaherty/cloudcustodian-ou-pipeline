@@ -194,7 +194,7 @@ Resources:
               OutputArtifacts:
                 []
               RunOrder: 1
-          Name: UpdateStack
+          Name: UpdatePipeline
       ArtifactStore:
         Location:
           Ref: CloudCustodianArtifactsBucket23B88D24
