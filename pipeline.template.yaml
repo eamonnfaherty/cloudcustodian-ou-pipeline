@@ -443,7 +443,7 @@ Resources:
                     },
                     "build": {
                       "commands": [
-                        "c7n validate policies/"
+                        "custodian validate policies/*"
                       ]
                     }
                   }
