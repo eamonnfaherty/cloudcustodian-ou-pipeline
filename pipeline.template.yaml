@@ -235,7 +235,7 @@ Resources:
                   Ref: c7nValidateProject3521B89B
               InputArtifacts:
                 - Name: source
-              Name: c7nAction
+              Name: c7nValidateAction
               OutputArtifacts:
                 []
               RunOrder: 1
@@ -262,7 +262,7 @@ Resources:
                   Ref: c7nDeployProjectF5F281AD
               InputArtifacts:
                 - Name: source
-              Name: c7nAction
+              Name: c7nDeployToOrgAction
               OutputArtifacts:
                 []
               RunOrder: 1
@@ -554,11 +554,13 @@ Resources:
                       "commands": [
                         "curl -L https://github.com/capitalone/cloud-custodian/archive/
               - Ref: C7NVersion
-              - >-
+              - |-
                 .zip -o c7n.zip",
                         "unzip c7n.zip",
-                        "ls -laR",
-                        "python orgaccounts.py -f accounts.yml",
+                        "python cloud-custodian-
+              - Ref: C7NVersion
+              - >-
+                /tools/c7n_org/scripts/orgaccounts.py -f accounts.yml",
                         "c7n-org run -c accounts.yml -s output -u test.yml --dryrun"
                       ]
                     }
