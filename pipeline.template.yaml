@@ -99,6 +99,15 @@ Resources:
                   - :stack/
                   - Ref: AWS::StackName
                   - /*
+          - Action:
+              - codebuild:BatchGetBuilds
+              - codebuild:StartBuild
+              - codebuild:StopBuild
+            Effect: Allow
+            Resource:
+              Fn::GetAtt:
+                - CodeBuild2FDE9E35
+                - Arn
         Version: "2012-10-17"
       PolicyName: CloudCustodianRoleDefaultPolicy6A7DDA48
       Roles:
@@ -201,6 +210,22 @@ Resources:
                 []
               RunOrder: 1
           Name: UpdatePipeline
+        - Actions:
+            - ActionTypeId:
+                Category: Build
+                Owner: AWS
+                Provider: CodeBuild
+                Version: "1"
+              Configuration:
+                ProjectName:
+                  Ref: CodeBuild2FDE9E35
+              InputArtifacts:
+                - Name: source
+              Name: c7n
+              OutputArtifacts:
+                - Name: Artifact_CdkStackc7n0E6D1C66
+              RunOrder: 1
+          Name: c7n
       ArtifactStore:
         Location:
           Ref: CloudCustodianArtifactsBucket23B88D24
@@ -324,6 +349,24 @@ Resources:
                     - :log-group:/aws/codebuild/
                     - Ref: CodeBuild2FDE9E35
                     - :*
+          - Action:
+              - s3:GetObject*
+              - s3:GetBucket*
+              - s3:List*
+              - s3:DeleteObject*
+              - s3:PutObject*
+              - s3:Abort*
+            Effect: Allow
+            Resource:
+              - Fn::GetAtt:
+                  - CloudCustodianArtifactsBucket23B88D24
+                  - Arn
+              - Fn::Join:
+                  - ""
+                  - - Fn::GetAtt:
+                        - CloudCustodianArtifactsBucket23B88D24
+                        - Arn
+                    - /*
         Version: "2012-10-17"
       PolicyName: CodeBuildRoleDefaultPolicy196BAF24
       Roles:
