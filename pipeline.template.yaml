@@ -303,6 +303,20 @@ Resources:
         - Ref: CustodianMasterRole082F2587
     Metadata:
       aws:cdk:path: CdkStack/CustodianMasterPolicy/Resource
+  CustodianSpokeRoleB7AE9251:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Action: sts:AssumeRole
+            Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+        Version: "2012-10-17"
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AdministratorAccess
+    Metadata:
+      aws:cdk:path: CdkStack/CustodianSpokeRole/Resource
   cloneWebhookResource4649A1C1:
     Type: AWS::CodePipeline::Webhook
     Properties:
