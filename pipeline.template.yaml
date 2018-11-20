@@ -1,10 +1,10 @@
 Parameters:
   Owner:
     Type: String
-    Description: "The owner of the github repo: https://github.com/OWNER/repo"
+    Description: 'The owner of the github repo: https://github.com/OWNER/repo'
   Repo:
     Type: String
-    Description: "The repo : https://github.com/owner/REPO"
+    Description: 'The repo : https://github.com/owner/REPO'
   Branch:
     Type: String
     Description: The branch of the github repo
@@ -18,140 +18,123 @@ Parameters:
     Type: String
     Description: Version of c7n-org to use
 Resources:
-  CloudCustodianArtifactsBucket23B88D24:
-    Type: AWS::S3::Bucket
+  CloudCustodianArtifactsBucket:
+    Type: 'AWS::S3::Bucket'
     DeletionPolicy: Retain
-    Metadata:
-      aws:cdk:path: CdkStack/CloudCustodian-/ArtifactsBucket/Resource
-  CloudCustodianRoleF8114338:
-    Type: AWS::IAM::Role
+  CloudCustodianRole:
+    Type: 'AWS::IAM::Role'
     Properties:
       AssumeRolePolicyDocument:
         Statement:
-          - Action: sts:AssumeRole
+          - Action: 'sts:AssumeRole'
             Effect: Allow
             Principal:
               Service: codepipeline.amazonaws.com
-        Version: "2012-10-17"
-    Metadata:
-      aws:cdk:path: CdkStack/CloudCustodian-/Role/Resource
-  CloudCustodianRoleDefaultPolicy6A7DDA48:
-    Type: AWS::IAM::Policy
+        Version: 2012-10-17
+  CloudCustodianRoleDefaultPolicy:
+    Type: 'AWS::IAM::Policy'
     Properties:
       PolicyDocument:
         Statement:
           - Action:
-              - s3:GetObject*
-              - s3:GetBucket*
-              - s3:List*
-              - s3:DeleteObject*
-              - s3:PutObject*
-              - s3:Abort*
+              - 's3:GetObject*'
+              - 's3:GetBucket*'
+              - 's3:List*'
+              - 's3:DeleteObject*'
+              - 's3:PutObject*'
+              - 's3:Abort*'
             Effect: Allow
             Resource:
-              - Fn::GetAtt:
-                  - CloudCustodianArtifactsBucket23B88D24
-                  - Arn
-              - Fn::Join:
-                  - ""
-                  - - Fn::GetAtt:
-                        - CloudCustodianArtifactsBucket23B88D24
-                        - Arn
-                    - /*
-          - Action: iam:PassRole
-            Effect: Allow
-            Resource:
-              Fn::GetAtt:
-                - GeneratePipelineChangeSetRole2F2D52E3
+              - !GetAtt
+                - CloudCustodianArtifactsBucket
                 - Arn
+              - !Join
+                - ''
+                - - !GetAtt
+                    - CloudCustodianArtifactsBucket
+                    - Arn
+                  - /*
+          - Action: 'iam:PassRole'
+            Effect: Allow
+            Resource: !GetAtt
+              - GeneratePipelineChangeSetRole
+              - Arn
           - Action:
-              - cloudformation:CreateChangeSet
-              - cloudformation:DeleteChangeSet
-              - cloudformation:DescribeChangeSet
-              - cloudformation:DescribeStacks
+              - 'cloudformation:CreateChangeSet'
+              - 'cloudformation:DeleteChangeSet'
+              - 'cloudformation:DescribeChangeSet'
+              - 'cloudformation:DescribeStacks'
             Condition:
               StringEqualsIfExists:
-                cloudformation:ChangeSetName: pipelineChangeSet
+                'cloudformation:ChangeSetName': pipelineChangeSet
             Effect: Allow
-            Resource:
-              Fn::Join:
-                - ""
-                - - "arn:"
-                  - Ref: AWS::Partition
-                  - ":cloudformation:"
-                  - Ref: AWS::Region
-                  - ":"
-                  - Ref: AWS::AccountId
-                  - :stack/
-                  - Ref: AWS::StackName
-                  - /*
-          - Action: cloudformation:ExecuteChangeSet
+            Resource: !Join
+              - ''
+              - - 'arn:'
+                - !Ref 'AWS::Partition'
+                - ':cloudformation:'
+                - !Ref 'AWS::Region'
+                - ':'
+                - !Ref 'AWS::AccountId'
+                - ':stack/'
+                - !Ref 'AWS::StackName'
+                - /*
+          - Action: 'cloudformation:ExecuteChangeSet'
             Condition:
               StringEquals:
-                cloudformation:ChangeSetName: pipelineChangeSet
+                'cloudformation:ChangeSetName': pipelineChangeSet
             Effect: Allow
-            Resource:
-              Fn::Join:
-                - ""
-                - - "arn:"
-                  - Ref: AWS::Partition
-                  - ":cloudformation:"
-                  - Ref: AWS::Region
-                  - ":"
-                  - Ref: AWS::AccountId
-                  - :stack/
-                  - Ref: AWS::StackName
-                  - /*
+            Resource: !Join
+              - ''
+              - - 'arn:'
+                - !Ref 'AWS::Partition'
+                - ':cloudformation:'
+                - !Ref 'AWS::Region'
+                - ':'
+                - !Ref 'AWS::AccountId'
+                - ':stack/'
+                - !Ref 'AWS::StackName'
+                - /*
           - Action:
-              - codebuild:BatchGetBuilds
-              - codebuild:StartBuild
-              - codebuild:StopBuild
+              - 'codebuild:BatchGetBuilds'
+              - 'codebuild:StartBuild'
+              - 'codebuild:StopBuild'
             Effect: Allow
-            Resource:
-              Fn::GetAtt:
-                - c7nValidateProject3521B89B
-                - Arn
+            Resource: !GetAtt
+              - c7nValidateProject
+              - Arn
           - Action:
-              - codebuild:BatchGetBuilds
-              - codebuild:StartBuild
-              - codebuild:StopBuild
+              - 'codebuild:BatchGetBuilds'
+              - 'codebuild:StartBuild'
+              - 'codebuild:StopBuild'
             Effect: Allow
-            Resource:
-              Fn::GetAtt:
-                - c7nDeployProjectF5F281AD
-                - Arn
-        Version: "2012-10-17"
-      PolicyName: CloudCustodianRoleDefaultPolicy6A7DDA48
+            Resource: !GetAtt
+              - c7nDeployProject
+              - Arn
+        Version: 2012-10-17
+      PolicyName: CloudCustodianRoleDefaultPolicy
       Roles:
-        - Ref: CloudCustodianRoleF8114338
-    Metadata:
-      aws:cdk:path: CdkStack/CloudCustodian-/Role/DefaultPolicy/Resource
-  CloudCustodian49A01519:
-    Type: AWS::CodePipeline::Pipeline
+        - !Ref CloudCustodianRole
+  CloudCustodian:
+    Type: 'AWS::CodePipeline::Pipeline'
     Properties:
-      RoleArn:
-        Fn::GetAtt:
-          - CloudCustodianRoleF8114338
-          - Arn
+      RoleArn: !GetAtt
+        - CloudCustodianRole
+        - Arn
       Stages:
         - Actions:
             - ActionTypeId:
                 Category: Source
                 Owner: ThirdParty
                 Provider: GitHub
-                Version: "1"
+                Version: '1'
               Configuration:
-                Owner:
-                  Ref: Owner
-                Repo:
-                  Ref: Repo
-                Branch:
-                  Ref: Branch
-                OAuthToken:
-                  Ref: Token
+                Owner: !Ref Owner
+                Repo: !Ref Repo
+                Branch: !Ref Branch
+                OAuthToken: !Ref Token
                 PollForSourceChanges: false
-              InputArtifacts:
-                []
+              InputArtifacts: []
               Name: clone
               OutputArtifacts:
                 - Name: source
@@ -162,66 +145,57 @@ Resources:
                 Category: Deploy
                 Owner: AWS
                 Provider: CloudFormation
-                Version: "1"
+                Version: '1'
               Configuration:
-                StackName:
-                  Ref: AWS::StackName
+                StackName: !Ref 'AWS::StackName'
                 ActionMode: CHANGE_SET_REPLACE
                 ChangeSetName: pipelineChangeSet
-                TemplatePath: source::pipeline.template.yaml
+                TemplatePath: 'source::pipeline.template.yaml'
                 Capabilities: CAPABILITY_NAMED_IAM
-                RoleArn:
-                  Fn::GetAtt:
-                    - GeneratePipelineChangeSetRole2F2D52E3
-                    - Arn
-                ParameterOverrides:
-                  Fn::Join:
-                    - ""
-                    - - '{"Owner":"'
-                      - Ref: Owner
-                      - '","Repo":"'
-                      - Ref: Repo
-                      - '","Branch":"'
-                      - Ref: Branch
-                      - '","Token":"'
-                      - Ref: Token
-                      - '","C7NVersion":"'
-                      - Ref: C7NVersion
-                      - '","C7NOrgVersion":"'
-                      - Ref: C7NOrgVersion
-                      - '"}'
+                RoleArn: !GetAtt
+                  - GeneratePipelineChangeSetRole
+                  - Arn
+                ParameterOverrides: !Join
+                  - ''
+                  - - '{"Owner":"'
+                    - !Ref Owner
+                    - '","Repo":"'
+                    - !Ref Repo
+                    - '","Branch":"'
+                    - !Ref Branch
+                    - '","Token":"'
+                    - !Ref Token
+                    - '","C7NVersion":"'
+                    - !Ref C7NVersion
+                    - '","C7NOrgVersion":"'
+                    - !Ref C7NOrgVersion
+                    - '"}'
               InputArtifacts:
                 - Name: source
               Name: GeneratePipelineChangeSet
-              OutputArtifacts:
-                []
+              OutputArtifacts: []
               RunOrder: 1
             - ActionTypeId:
                 Category: Approval
                 Owner: AWS
                 Provider: Manual
-                Version: "1"
-              InputArtifacts:
-                []
+                Version: '1'
+              InputArtifacts: []
               Name: ApprovePipelineChangeSet
-              OutputArtifacts:
-                []
+              OutputArtifacts: []
               RunOrder: 2
             - ActionTypeId:
                 Category: Deploy
                 Owner: AWS
                 Provider: CloudFormation
-                Version: "1"
+                Version: '1'
               Configuration:
-                StackName:
-                  Ref: AWS::StackName
+                StackName: !Ref 'AWS::StackName'
                 ActionMode: CHANGE_SET_EXECUTE
                 ChangeSetName: pipelineChangeSet
-              InputArtifacts:
-                []
+              InputArtifacts: []
               Name: ApplyPipelineChangeSet
-              OutputArtifacts:
-                []
+              OutputArtifacts: []
               RunOrder: 3
           Name: UpdatePipeline
         - Actions:
@@ -229,26 +203,22 @@ Resources:
                 Category: Test
                 Owner: AWS
                 Provider: CodeBuild
-                Version: "1"
+                Version: '1'
               Configuration:
-                ProjectName:
-                  Ref: c7nValidateProject3521B89B
+                ProjectName: !Ref c7nValidateProject
               InputArtifacts:
                 - Name: source
               Name: c7nValidateAction
-              OutputArtifacts:
-                []
+              OutputArtifacts: []
               RunOrder: 1
             - ActionTypeId:
                 Category: Approval
                 Owner: AWS
                 Provider: Manual
-                Version: "1"
-              InputArtifacts:
-                []
+                Version: '1'
+              InputArtifacts: []
               Name: ApproveC7NPolicies
-              OutputArtifacts:
-                []
+              OutputArtifacts: []
               RunOrder: 2
           Name: c7nValidateStage
         - Actions:
@@ -256,327 +226,287 @@ Resources:
                 Category: Test
                 Owner: AWS
                 Provider: CodeBuild
-                Version: "1"
+                Version: '1'
               Configuration:
-                ProjectName:
-                  Ref: c7nDeployProjectF5F281AD
+                ProjectName: !Ref c7nDeployProject
               InputArtifacts:
                 - Name: source
               Name: c7nDeployToOrgAction
-              OutputArtifacts:
-                []
+              OutputArtifacts: []
               RunOrder: 1
           Name: c7nDeployStage
       ArtifactStore:
-        Location:
-          Ref: CloudCustodianArtifactsBucket23B88D24
+        Location: !Ref CloudCustodianArtifactsBucket
         Type: S3
       RestartExecutionOnUpdate: true
     DependsOn:
-      - CloudCustodianRoleF8114338
-      - CloudCustodianRoleDefaultPolicy6A7DDA48
-    Metadata:
-      aws:cdk:path: CdkStack/CloudCustodian-/Resource
-  CustodianMasterRole082F2587:
-    Type: AWS::IAM::Role
+      - CloudCustodianRole
+      - CloudCustodianRoleDefaultPolicy
+  CustodianMasterRole:
+    Type: 'AWS::IAM::Role'
     Properties:
       AssumeRolePolicyDocument:
         Statement:
-          - Action: sts:AssumeRole
+          - Action: 'sts:AssumeRole'
             Effect: Allow
             Principal:
               Service: lambda.amazonaws.com
-          - Action: sts:AssumeRole
+          - Action: 'sts:AssumeRole'
             Effect: Allow
             Principal:
               Service: codebuild.amazonaws.com
-        Version: "2012-10-17"
+        Version: 2012-10-17
       ManagedPolicyArns:
-        - arn:aws:iam::aws:policy/AdministratorAccess
+        - 'arn:aws:iam::aws:policy/AdministratorAccess'
       RoleName: CustodianMasterRole
-    Metadata:
-      aws:cdk:path: CdkStack/CustodianMasterRole/Resource
-  CustodianMasterRoleDefaultPolicy381F655D:
-    Type: AWS::IAM::Policy
+  CustodianMasterRoleDefaultPolicy:
+    Type: 'AWS::IAM::Policy'
     Properties:
       PolicyDocument:
         Statement:
           - Action:
-              - logs:CreateLogGroup
-              - logs:CreateLogStream
-              - logs:PutLogEvents
+              - 'logs:CreateLogGroup'
+              - 'logs:CreateLogStream'
+              - 'logs:PutLogEvents'
             Effect: Allow
             Resource:
-              - Fn::Join:
-                  - ""
-                  - - "arn:"
-                    - Ref: AWS::Partition
-                    - ":logs:"
-                    - Ref: AWS::Region
-                    - ":"
-                    - Ref: AWS::AccountId
-                    - :log-group:/aws/codebuild/
-                    - Ref: c7nDeployProjectF5F281AD
-              - Fn::Join:
-                  - ""
-                  - - "arn:"
-                    - Ref: AWS::Partition
-                    - ":logs:"
-                    - Ref: AWS::Region
-                    - ":"
-                    - Ref: AWS::AccountId
-                    - :log-group:/aws/codebuild/
-                    - Ref: c7nDeployProjectF5F281AD
-                    - :*
+              - !Join
+                - ''
+                - - 'arn:'
+                  - !Ref 'AWS::Partition'
+                  - ':logs:'
+                  - !Ref 'AWS::Region'
+                  - ':'
+                  - !Ref 'AWS::AccountId'
+                  - ':log-group:/aws/codebuild/'
+                  - !Ref c7nDeployProject
+              - !Join
+                - ''
+                - - 'arn:'
+                  - !Ref 'AWS::Partition'
+                  - ':logs:'
+                  - !Ref 'AWS::Region'
+                  - ':'
+                  - !Ref 'AWS::AccountId'
+                  - ':log-group:/aws/codebuild/'
+                  - !Ref c7nDeployProject
+                  - ':*'
           - Action:
-              - s3:GetObject*
-              - s3:GetBucket*
-              - s3:List*
+              - 's3:GetObject*'
+              - 's3:GetBucket*'
+              - 's3:List*'
             Effect: Allow
             Resource:
-              - Fn::GetAtt:
-                  - CloudCustodianArtifactsBucket23B88D24
-                  - Arn
-              - Fn::Join:
-                  - ""
-                  - - Fn::GetAtt:
-                        - CloudCustodianArtifactsBucket23B88D24
-                        - Arn
-                    - /*
-        Version: "2012-10-17"
-      PolicyName: CustodianMasterRoleDefaultPolicy381F655D
+              - !GetAtt
+                - CloudCustodianArtifactsBucket
+                - Arn
+              - !Join
+                - ''
+                - - !GetAtt
+                    - CloudCustodianArtifactsBucket
+                    - Arn
+                  - /*
+        Version: 2012-10-17
+      PolicyName: CustodianMasterRoleDefaultPolicy
       Roles:
-        - Ref: CustodianMasterRole082F2587
-    Metadata:
-      aws:cdk:path: CdkStack/CustodianMasterRole/DefaultPolicy/Resource
-  CustodianSpokeRoleB7AE9251:
-    Type: AWS::IAM::Role
+        - !Ref CustodianMasterRole
+  CustodianSpokeRole:
+    Type: 'AWS::IAM::Role'
     Properties:
       AssumeRolePolicyDocument:
         Statement:
-          - Action: sts:AssumeRole
+          - Action: 'sts:AssumeRole'
             Effect: Allow
             Principal:
               Service: lambda.amazonaws.com
-        Version: "2012-10-17"
+        Version: 2012-10-17
       ManagedPolicyArns:
-        - arn:aws:iam::aws:policy/AdministratorAccess
+        - 'arn:aws:iam::aws:policy/AdministratorAccess'
       RoleName: CustodianSpokeRole
-    Metadata:
-      aws:cdk:path: CdkStack/CustodianSpokeRole/Resource
-  cloneWebhookResource4649A1C1:
-    Type: AWS::CodePipeline::Webhook
+  cloneWebhookResource:
+    Type: 'AWS::CodePipeline::Webhook'
     Properties:
       Authentication: GITHUB_HMAC
       AuthenticationConfiguration:
-        SecretToken:
-          Ref: Token
+        SecretToken: !Ref Token
       Filters:
         - JsonPath: $.ref
-          MatchEquals: refs/heads/{Branch}
+          MatchEquals: 'refs/heads/{Branch}'
       TargetAction: clone
-      TargetPipeline:
-        Ref: CloudCustodian49A01519
+      TargetPipeline: !Ref CloudCustodian
       TargetPipelineVersion: 1
       RegisterWithThirdParty: true
-    Metadata:
-      aws:cdk:path: CdkStack/clone/WebhookResource
-  GeneratePipelineChangeSetRole2F2D52E3:
-    Type: AWS::IAM::Role
+  GeneratePipelineChangeSetRole:
+    Type: 'AWS::IAM::Role'
     Properties:
       AssumeRolePolicyDocument:
         Statement:
-          - Action: sts:AssumeRole
+          - Action: 'sts:AssumeRole'
             Effect: Allow
             Principal:
               Service: cloudformation.amazonaws.com
-        Version: "2012-10-17"
-    Metadata:
-      aws:cdk:path: CdkStack/GeneratePipelineChangeSet/Role/Resource
-  GeneratePipelineChangeSetRoleDefaultPolicy1774FD25:
-    Type: AWS::IAM::Policy
+        Version: 2012-10-17
+  GeneratePipelineChangeSetRoleDefaultPolicy:
+    Type: 'AWS::IAM::Policy'
     Properties:
       PolicyDocument:
         Statement:
-          - Action: "*"
+          - Action: '*'
             Effect: Allow
-            Resource: "*"
-        Version: "2012-10-17"
-      PolicyName: GeneratePipelineChangeSetRoleDefaultPolicy1774FD25
+            Resource: '*'
+        Version: 2012-10-17
+      PolicyName: GeneratePipelineChangeSetRoleDefaultPolicy
       Roles:
-        - Ref: GeneratePipelineChangeSetRole2F2D52E3
-    Metadata:
-      aws:cdk:path: CdkStack/GeneratePipelineChangeSet/Role/DefaultPolicy/Resource
-  c7nValidateProjectRole2857EB2B:
-    Type: AWS::IAM::Role
+        - !Ref GeneratePipelineChangeSetRole
+  c7nValidateProjectRole:
+    Type: 'AWS::IAM::Role'
     Properties:
       AssumeRolePolicyDocument:
         Statement:
-          - Action: sts:AssumeRole
+          - Action: 'sts:AssumeRole'
             Effect: Allow
             Principal:
               Service: codebuild.amazonaws.com
-        Version: "2012-10-17"
-    Metadata:
-      aws:cdk:path: CdkStack/c7nValidateProject/Role/Resource
-  c7nValidateProjectRoleDefaultPolicy996D37E5:
-    Type: AWS::IAM::Policy
+        Version: 2012-10-17
+  c7nValidateProjectRoleDefaultPolicy:
+    Type: 'AWS::IAM::Policy'
     Properties:
       PolicyDocument:
         Statement:
           - Action:
-              - logs:CreateLogGroup
-              - logs:CreateLogStream
-              - logs:PutLogEvents
+              - 'logs:CreateLogGroup'
+              - 'logs:CreateLogStream'
+              - 'logs:PutLogEvents'
             Effect: Allow
             Resource:
-              - Fn::Join:
-                  - ""
-                  - - "arn:"
-                    - Ref: AWS::Partition
-                    - ":logs:"
-                    - Ref: AWS::Region
-                    - ":"
-                    - Ref: AWS::AccountId
-                    - :log-group:/aws/codebuild/
-                    - Ref: c7nValidateProject3521B89B
-              - Fn::Join:
-                  - ""
-                  - - "arn:"
-                    - Ref: AWS::Partition
-                    - ":logs:"
-                    - Ref: AWS::Region
-                    - ":"
-                    - Ref: AWS::AccountId
-                    - :log-group:/aws/codebuild/
-                    - Ref: c7nValidateProject3521B89B
-                    - :*
+              - !Join
+                - ''
+                - - 'arn:'
+                  - !Ref 'AWS::Partition'
+                  - ':logs:'
+                  - !Ref 'AWS::Region'
+                  - ':'
+                  - !Ref 'AWS::AccountId'
+                  - ':log-group:/aws/codebuild/'
+                  - !Ref c7nValidateProject
+              - !Join
+                - ''
+                - - 'arn:'
+                  - !Ref 'AWS::Partition'
+                  - ':logs:'
+                  - !Ref 'AWS::Region'
+                  - ':'
+                  - !Ref 'AWS::AccountId'
+                  - ':log-group:/aws/codebuild/'
+                  - !Ref c7nValidateProject
+                  - ':*'
           - Action:
-              - s3:GetObject*
-              - s3:GetBucket*
-              - s3:List*
+              - 's3:GetObject*'
+              - 's3:GetBucket*'
+              - 's3:List*'
             Effect: Allow
             Resource:
-              - Fn::GetAtt:
-                  - CloudCustodianArtifactsBucket23B88D24
-                  - Arn
-              - Fn::Join:
-                  - ""
-                  - - Fn::GetAtt:
-                        - CloudCustodianArtifactsBucket23B88D24
-                        - Arn
-                    - /*
-        Version: "2012-10-17"
-      PolicyName: c7nValidateProjectRoleDefaultPolicy996D37E5
+              - !GetAtt
+                - CloudCustodianArtifactsBucket
+                - Arn
+              - !Join
+                - ''
+                - - !GetAtt
+                    - CloudCustodianArtifactsBucket
+                    - Arn
+                  - /*
+        Version: 2012-10-17
+      PolicyName: c7nValidateProjectRoleDefaultPolicy
       Roles:
-        - Ref: c7nValidateProjectRole2857EB2B
-    Metadata:
-      aws:cdk:path: CdkStack/c7nValidateProject/Role/DefaultPolicy/Resource
-  c7nValidateProject3521B89B:
-    Type: AWS::CodeBuild::Project
+        - !Ref c7nValidateProjectRole
+  c7nValidateProject:
+    Type: 'AWS::CodeBuild::Project'
     Properties:
       Artifacts:
         Type: NO_ARTIFACTS
       Environment:
         ComputeType: BUILD_GENERAL1_SMALL
-        Image: aws/codebuild/python:2.7.12
+        Image: 'aws/codebuild/python:2.7.12'
         PrivilegedMode: false
         Type: LINUX_CONTAINER
-      ServiceRole:
-        Fn::GetAtt:
-          - c7nValidateProjectRole2857EB2B
-          - Arn
+      ServiceRole: !GetAtt
+        - c7nValidateProjectRole
+        - Arn
       Source:
-        BuildSpec:
-          Fn::Join:
-            - ""
-            - - |-
-                {
-                  "version": "0.2",
-                  "phases": {
-                    "install": {
-                      "commands": [
-                        "pip install c7n==
-              - Ref: C7NVersion
-              - |-
-                "
-                      ]
-                    },
-                    "build": {
-                      "commands": [
-                        "custodian validate policies/*"
-                      ]
-                    }
-                  }
-                }
-        Type: NO_SOURCE
-    Metadata:
-      aws:cdk:path: CdkStack/c7nValidateProject/Resource
-  c7nDeployProjectF5F281AD:
-    Type: AWS::CodeBuild::Project
-    Properties:
-      Artifacts:
-        Type: NO_ARTIFACTS
-      Environment:
-        ComputeType: BUILD_GENERAL1_SMALL
-        Image: aws/codebuild/python:2.7.12
-        PrivilegedMode: false
-        Type: LINUX_CONTAINER
-      ServiceRole:
-        Fn::GetAtt:
-          - CustodianMasterRole082F2587
-          - Arn
-      Source:
-        BuildSpec:
-          Fn::Join:
-            - ""
-            - - |-
-                {
-                  "version": "0.2",
-                  "phases": {
-                    "install": {
-                      "commands": [
-                        "pip install c7n==
-              - Ref: C7NVersion
-              - |-
-                ",
-                        "pip install c7n-org==
-              - Ref: C7NOrgVersion
-              - >-
-                "
-                      ]
-                    },
-                    "build": {
-                      "commands": [
-                        "curl -L https://github.com/capitalone/cloud-custodian/archive/
-              - Ref: C7NVersion
-              - |-
-                .zip -o c7n.zip",
-                        "unzip c7n.zip",
-                        "python cloud-custodian-
-              - Ref: C7NVersion
-              - >-
-                /tools/c7n_org/scripts/orgaccounts.py -f accounts.yml --role
-                arn:aws:iam::{Id}:role/CustodianSpokeRole",
-                        "cat accounts.yml",
-                        "find policies -name '*.yaml' | sed 's/^/c7n-org run -c accounts.yml -s output -u /g' | sh"
-                      ]
-                    }
+        BuildSpec: !Join
+          - ''
+          - - |-
+              {
+                "version": "0.2",
+                "phases": {
+                  "install": {
+                    "commands": [
+                      "pip install c7n==
+            - !Ref C7NVersion
+            - |-
+              "
+                    ]
                   },
-                  "artifacts": {
-                    "base-directory": "output",
-                    "files": "**/*"
+                  "build": {
+                    "commands": [
+                      "custodian validate policies/*"
+                    ]
                   }
                 }
+              }
         Type: NO_SOURCE
-    Metadata:
-      aws:cdk:path: CdkStack/c7nDeployProject/Resource
-  CDKMetadata:
-    Type: AWS::CDK::Metadata
+  c7nDeployProject:
+    Type: 'AWS::CodeBuild::Project'
     Properties:
-      Modules: "@aws-cdk/aws-cloudformation=0.18.0,@aws-cdk/aws-cloudwatch=0.18.0,@aws\
-        -cdk/aws-codebuild=0.18.0,@aws-cdk/aws-codepipeline=0.18.0,@aws-cdk/aws\
-        -codepipeline-api=0.18.0,@aws-cdk/aws-events=0.18.0,@aws-cdk/aws-iam=0.\
-        18.0,@aws-cdk/aws-kms=0.18.0,@aws-cdk/aws-s3=0.18.0,@aws-cdk/aws-s3-not\
-        ifications=0.18.0,@aws-cdk/cdk=0.18.0,@aws-cdk/cx-api=0.18.0,cdk=0.1.0"
-
+      Artifacts:
+        Type: NO_ARTIFACTS
+      Environment:
+        ComputeType: BUILD_GENERAL1_SMALL
+        Image: 'aws/codebuild/python:2.7.12'
+        PrivilegedMode: false
+        Type: LINUX_CONTAINER
+      ServiceRole: !GetAtt
+        - CustodianMasterRole
+        - Arn
+      Source:
+        BuildSpec: !Join
+          - ''
+          - - |-
+              {
+                "version": "0.2",
+                "phases": {
+                  "install": {
+                    "commands": [
+                      "pip install c7n==
+            - !Ref C7NVersion
+            - |-
+              ",
+                      "pip install c7n-org==
+            - !Ref C7NOrgVersion
+            - |-
+              "
+                    ]
+                  },
+                  "build": {
+                    "commands": [
+                      "curl -L https://github.com/capitalone/cloud-custodian/archive/
+            - !Ref C7NVersion
+            - |-
+              .zip -o c7n.zip",
+                      "unzip c7n.zip",
+                      "python cloud-custodian-
+            - !Ref C7NVersion
+            - >-
+              /tools/c7n_org/scripts/orgaccounts.py -f accounts.yml --role
+              arn:aws:iam::{Id}:role/CustodianSpokeRole",
+                      "cat accounts.yml",
+                      "find policies -name '*.yaml' | sed 's/^/c7n-org run -c accounts.yml -s output -u /g' | sh"
+                    ]
+                  }
+                },
+                "artifacts": {
+                  "base-directory": "output",
+                  "files": "**/*"
+                }
+              }
+        Type: NO_SOURCE
