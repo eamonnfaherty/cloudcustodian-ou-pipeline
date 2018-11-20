@@ -581,7 +581,7 @@ Resources:
               - >-
                 /tools/c7n_org/scripts/orgaccounts.py -f accounts.yml",
                         "cat accounts.yml",
-                        "c7n-org run -c accounts.yml -s output -u test.yml --dryrun"
+                        "c7n-org run -c accounts.yml -s output -u policies/* --dryrun"
                       ]
                     }
                   },
