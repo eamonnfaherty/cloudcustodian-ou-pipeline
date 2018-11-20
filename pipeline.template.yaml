@@ -287,23 +287,64 @@ Resources:
             Principal:
               Service: lambda.amazonaws.com
         Version: "2012-10-17"
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AdministratorAccess
       RoleName: CustodianMasterRole
     Metadata:
       aws:cdk:path: CdkStack/CustodianMasterRole/Resource
-  CustodianMasterPolicyACD66D26:
+  CustodianMasterRoleDefaultPolicy381F655D:
     Type: AWS::IAM::Policy
     Properties:
       PolicyDocument:
         Statement:
-          - Action: "*"
+          - Action:
+              - logs:CreateLogGroup
+              - logs:CreateLogStream
+              - logs:PutLogEvents
             Effect: Allow
-            Resource: "*"
+            Resource:
+              - Fn::Join:
+                  - ""
+                  - - "arn:"
+                    - Ref: AWS::Partition
+                    - ":logs:"
+                    - Ref: AWS::Region
+                    - ":"
+                    - Ref: AWS::AccountId
+                    - :log-group:/aws/codebuild/
+                    - Ref: c7nDeployProjectF5F281AD
+              - Fn::Join:
+                  - ""
+                  - - "arn:"
+                    - Ref: AWS::Partition
+                    - ":logs:"
+                    - Ref: AWS::Region
+                    - ":"
+                    - Ref: AWS::AccountId
+                    - :log-group:/aws/codebuild/
+                    - Ref: c7nDeployProjectF5F281AD
+                    - :*
+          - Action:
+              - s3:GetObject*
+              - s3:GetBucket*
+              - s3:List*
+            Effect: Allow
+            Resource:
+              - Fn::GetAtt:
+                  - CloudCustodianArtifactsBucket23B88D24
+                  - Arn
+              - Fn::Join:
+                  - ""
+                  - - Fn::GetAtt:
+                        - CloudCustodianArtifactsBucket23B88D24
+                        - Arn
+                    - /*
         Version: "2012-10-17"
-      PolicyName: CustodianMasterPolicyACD66D26
+      PolicyName: CustodianMasterRoleDefaultPolicy381F655D
       Roles:
         - Ref: CustodianMasterRole082F2587
     Metadata:
-      aws:cdk:path: CdkStack/CustodianMasterPolicy/Resource
+      aws:cdk:path: CdkStack/CustodianMasterRole/DefaultPolicy/Resource
   CustodianSpokeRoleB7AE9251:
     Type: AWS::IAM::Role
     Properties:
@@ -467,92 +508,6 @@ Resources:
         Type: NO_SOURCE
     Metadata:
       aws:cdk:path: CdkStack/c7nValidateProject/Resource
-  c7nDeployProjectRoleFBE697BE:
-    Type: AWS::IAM::Role
-    Properties:
-      AssumeRolePolicyDocument:
-        Statement:
-          - Action: sts:AssumeRole
-            Effect: Allow
-            Principal:
-              Service: codebuild.amazonaws.com
-        Version: "2012-10-17"
-    Metadata:
-      aws:cdk:path: CdkStack/c7nDeployProject/Role/Resource
-  c7nDeployProjectRoleDefaultPolicy050FCE60:
-    Type: AWS::IAM::Policy
-    Properties:
-      PolicyDocument:
-        Statement:
-          - Action:
-              - logs:CreateLogGroup
-              - logs:CreateLogStream
-              - logs:PutLogEvents
-            Effect: Allow
-            Resource:
-              - Fn::Join:
-                  - ""
-                  - - "arn:"
-                    - Ref: AWS::Partition
-                    - ":logs:"
-                    - Ref: AWS::Region
-                    - ":"
-                    - Ref: AWS::AccountId
-                    - :log-group:/aws/codebuild/
-                    - Ref: c7nDeployProjectF5F281AD
-              - Fn::Join:
-                  - ""
-                  - - "arn:"
-                    - Ref: AWS::Partition
-                    - ":logs:"
-                    - Ref: AWS::Region
-                    - ":"
-                    - Ref: AWS::AccountId
-                    - :log-group:/aws/codebuild/
-                    - Ref: c7nDeployProjectF5F281AD
-                    - :*
-          - Action:
-              - s3:GetObject*
-              - s3:GetBucket*
-              - s3:List*
-            Effect: Allow
-            Resource:
-              - Fn::GetAtt:
-                  - CloudCustodianArtifactsBucket23B88D24
-                  - Arn
-              - Fn::Join:
-                  - ""
-                  - - Fn::GetAtt:
-                        - CloudCustodianArtifactsBucket23B88D24
-                        - Arn
-                    - /*
-          - Action:
-              - organizations:List*
-              - organizations:Describe*
-            Effect: Allow
-            Resource: "*"
-          - Action: "*"
-            Effect: Allow
-            Resource:
-              Fn::Join:
-                - ""
-                - - "arn:aws:lambda:*:"
-                  - Ref: AWS::AccountId
-                  - :function:custodian-*
-          - Action: iam:PassRole
-            Effect: Allow
-            Resource:
-              Fn::Join:
-                - ""
-                - - "arn:aws:iam::"
-                  - Ref: AWS::AccountId
-                  - :role/CustodianSpokeRole
-        Version: "2012-10-17"
-      PolicyName: c7nDeployProjectRoleDefaultPolicy050FCE60
-      Roles:
-        - Ref: c7nDeployProjectRoleFBE697BE
-    Metadata:
-      aws:cdk:path: CdkStack/c7nDeployProject/Role/DefaultPolicy/Resource
   c7nDeployProjectF5F281AD:
     Type: AWS::CodeBuild::Project
     Properties:
@@ -565,7 +520,7 @@ Resources:
         Type: LINUX_CONTAINER
       ServiceRole:
         Fn::GetAtt:
-          - c7nDeployProjectRoleFBE697BE
+          - CustodianMasterRole082F2587
           - Arn
       Source:
         BuildSpec:
