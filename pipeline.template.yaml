@@ -510,6 +510,9 @@ Resources:
                         - CloudCustodianArtifactsBucket23B88D24
                         - Arn
                     - /*
+          - Action: organizations:ListRoots
+            Effect: Allow
+            Resource: "*"
         Version: "2012-10-17"
       PolicyName: c7nDeployProjectRoleDefaultPolicy050FCE60
       Roles:
