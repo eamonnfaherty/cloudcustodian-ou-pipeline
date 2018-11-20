@@ -192,7 +192,7 @@ Resources:
               Name: ApprovePipelineChangeSet
               OutputArtifacts:
                 []
-              RunOrder: 1
+              RunOrder: 2
             - ActionTypeId:
                 Category: Deploy
                 Owner: AWS
@@ -208,7 +208,7 @@ Resources:
               Name: ApplyPipelineChangeSet
               OutputArtifacts:
                 []
-              RunOrder: 1
+              RunOrder: 3
           Name: UpdatePipeline
         - Actions:
             - ActionTypeId:
