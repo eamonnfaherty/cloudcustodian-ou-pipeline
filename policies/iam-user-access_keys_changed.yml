@@ -1,0 +1,20 @@
+#© 2018 Amazon Web Services, Inc. or its affiliates. All Rights Reserved. This AWS Content is provided subject to the terms of the AWS Customer Agreement available at http://aws.amazon.com/agreement or other written agreement between Customer and Amazon Web Services, Inc.
+
+policies:
+- name: iam-user-access_keys_changed
+  resource: iam-user
+  comment: |
+    Alerts on rotation of access keys of IAM users in last 1 day.
+  filters:
+    - type: credential
+      key: access_keys.last_rotated
+      value_type: age
+      value: 1
+      op: less-than
+  actions:
+    - type: notify
+      to:
+        - compliance@mycompany.xyz
+      transport:
+        type: sns
+        topic: arn:aws:sns:eu-west-2:123456789012:IAM_users
