@@ -4,10 +4,15 @@ policies:
 - name: mfa_check
   resource: iam-user
   comments: |
-    Checks for users with no MFA device and notify.
+    Checks for users created more than 1 day ago and with no MFA device and notify.
   filters:
     - type: credential
       key: password_enabled
+    - type: credential
+      key: user_creation_time
+      value_type: age
+      value: 1
+      op: greater-than
     - type: mfa-device
       key: UserName
       value: empty
