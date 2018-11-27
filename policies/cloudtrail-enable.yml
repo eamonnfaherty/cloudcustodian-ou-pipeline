@@ -5,15 +5,13 @@ policies:
 - name: aws-cloudtrail-not-enabled
   resource: account
   comment: |
-    Scans for accounts which do not have CloudTrails enabled.
+    Scans for accounts which do not have CloudTrails enabled and enable it.
   filters:
     - type: check-cloudtrail
       global-events: true
       multi-region: true
       running: true
-      kms: true
-      file-digest: true
   actions:
     - type: enable-cloudtrail
       trail: mytrail #change
-      bucket: trails #change 
+      bucket: trails #change
